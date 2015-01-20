@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html ng-app="prototype">
+<head>
+    <meta charset=utf-8 />
+    <meta name="Search" content="Search"/>
+
+    <title>Search</title>
+
+    <link rel="stylesheet" href="css/search.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/select.css" />
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.css">
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <!--<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">-->
+
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <!--<script src="http://code.angularjs.org/angular-1.0.0rc3.min.js"></script>-->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-sanitize.js"></script>
+    <script src="js/SearchController.js"></script>
+    <script src="js/select.js"></script>
+
+    <style>
+        header {display:block;}
+    </style>
+
+</head>
+
+<body ng-controller="SearchController">
+
+    <header>
+        <h2 style="margin:20px" style="color:red">Search</h2>
+    </header>
+
+    <!--Simple Start-->
+    <div class="search-inputs">
+        <div class="simple-inputs">
+            <span style="color:red; width:80px; margin-right:20px; margin-left:20px;">Groups:</span>
+            <div class="dropdown" style="float:left; margin-right:10px;">
+                <!--<button class="group-dropdown btn btn-default dropdown-toggle" ng-show="advancedOn && inProjects" style="border-radius:5px; padding:5px;" type="button" data-toggle="dropdown" id="group_dropdown" aria-expanded="true">-->
+                    <!--<b>IN</b> Groups-->
+                    <!--<span class="caret"></span>-->
+                <!--</button>-->
+                <!--<button class="group-dropdown btn btn-default dropdown-toggle" ng-show="advancedOn && !inProjects" style="border-radius:5px; padding:5px;" type="button" data-toggle="dropdown" id="group_dropdown" aria-expanded="true">-->
+                    <!--<b>NOT IN</b> Groups-->
+                    <!--<span class="caret"></span>-->
+                <!--</button>-->
+                <ul class="dropdown-menu" role="menu" aria-labelledby="group_dropdown">
+                    <li role="presentation" ng-click="inProjects = true" stopEvent><a role="menuitem"><b>IN</b> GROUPS</a></li>
+                    <li role="presentation" ng-click="inProjects = false" stopEvent><a role="menuitem"><b>NOT</b> IN GROUPS</a></li>
+                </ul>
+            </div>
+            <ui-select reset-search-input="true" ng-disabled="advancedOn" on-select="addProjectToSearch($item)" multiple ng-model="projects" theme="select2" ng-disabled="disabled" class="groups-input">
+                <ui-select-match placeholder="Select groups...">{{$item}}</ui-select-match>
+                <ui-select-choices repeat="project in availableProjects | filter:$select.search">
+                    {{project}}
+                </ui-select-choices>
+            </ui-select>
+            <input id="multi-input" class="multisearch-input"  ng-disabled="advancedOn" style="border-radius:5px; padding:5px; background:white;" placeholder="Keywords (Title, Code, Metadata Value)">
+            <div style="float:right"><button class="btn btn-default btn-primary advanced-button" ng-init="advancedOn=false;" ng-click="toggleAdvanced();"><small>Advanced <span class="glyphicon glyphicon-arrow-down" ng-show="advancedOn" aria-hidden="true"></span>  <span class="glyphicon glyphicon-arrow-right" ng-show="!advancedOn" aria-hidden="true"></span></small></button></div>
+            <div style="float:right"><button class="btn btn-default btn-success search-button"><small>Search</small></button><button class="btn btn-default btn-success" style="margin-left:-10px;"><span class="glyphicon glyphicon-floppy-disk"></span></button></div>
+        </div>
+        <!--Simple Finish-->
+
+        <!--Advanced Start-->
+          <div class="inputs" ng-show="advancedOn" style="text-align:center; margin-top:20px; margin-left:-1px; float:left;">
+              <p style="color:red;">Advanced Search</p>
+              <button class="round-button"  ng-class="{true: 'btn-selected', false: btn-normal}[groupsActive]" ng-click="setGroupsActive()">Groups</button>
+              <button class="round-button"  ng-class="{true: 'btn-selected', false: btn-normal}[titleActive]" ng-click="setTitleActive()">Title</button>
+              <button class="round-button" ng-class="{true: 'btn-selected', false: btn-normal}[codeActive]" ng-click="setCodeActive()">Code</button>
+              <button class="round-button" ng-class="{true: 'btn-selected', false: btn-normal}[disciplineActive]" ng-click="setDisciplineActive()">Discipline</button>
+              <button class="round-button" ng-class="{true: 'btn-selected', false: btn-normal}[statusActive]" ng-click="setStatusActive()">Status</button>
+              <button class="round-button" ng-class="{true: 'btn-selected', false: btn-normal}[metaActive]" ng-click="setMetaActive()">Meta</button><br>
+              <ui-select reset-search-input="true" id="keep_width" on-select="addProjectToSearchArray($item);" multiple ng-show="groupsActive" ng-model="projectsInput.projects" theme="select2" ng-disabled="disabled" class="groups-input-advanced" style="margin-top:15px; margin-bottom:15px; border-radius:5px; padding:5px;">
+                  <ui-select-match placeholder="Select groups...">{{$item}}</ui-select-match>
+                  <ui-select-choices repeat="project in availableProjects | filter:$select.search">
+                      {{project}}
+                  </ui-select-choices>
+              </ui-select>
+              <input id="title_input" ng-model="advancedInput" ng-enter="addTermToSearch('must')" class="other-input" ng-show="titleActive" style="margin-top:20px; margin-bottom:20px; border-radius:5px; padding:5px;" placeholder="Input Title">
+              <input id="code_input" ng-model="advancedInput" ng-enter="addTermToSearch('must')" class="other-input" ng-show="codeActive" style="margin-top:20px; margin-bottom:20px; border-radius:5px; padding:5px;" placeholder="Input Code">
+              <div class="dropdown">
+                  <button class="group-dropdown btn btn-default dropdown-toggle other-input" ng-show="disciplineActive" style="border-radius:5px; width:420px; margin-top:20px; margin-bottom:20px;" type="button" data-toggle="dropdown" id="group_dropdown" aria-expanded="true">
+                      {{ disciplineSelected }}
+                      <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="group_dropdown" style="margin-top:-20px; margin-left:20px;">
+                      <li role="presentation" ng-click="disciplineSelected = 'Discipline 1'" stopEvent><a role="menuitem">Discipline 1</a></li>
+                      <li role="presentation" ng-click="disciplineSelected = 'Discipline 2'" stopEvent><a role="menuitem">Discipline 2</a></li>
+                      <li role="presentation" ng-click="disciplineSelected = 'Discipline 3'" stopEvent><a role="menuitem">Discipline 3</a></li>
+                      <li role="presentation" ng-click="disciplineSelected = 'Discipline 4'" stopEvent><a role="menuitem">Discipline 4</a></li>
+                  </ul>
+              </div>
+              <div class="dropdown">
+                  <button class="group-dropdown btn btn-default dropdown-toggle other-input" ng-show="statusActive" style="border-radius:5px; width:420px; margin-top:20px; margin-bottom:20px;" type="button" data-toggle="dropdown" id="group_dropdown" aria-expanded="true">
+                      {{ statusSelected }}
+                      <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="group_dropdown" style="margin-top:-20px; margin-left:20px;">
+                      <li role="presentation" ng-click="statusSelected = 'Status 1'" stopEvent><a role="menuitem">Status 1</a></li>
+                      <li role="presentation" ng-click="statusSelected = 'Status 2'" stopEvent><a role="menuitem">Status 2</a></li>
+                      <li role="presentation" ng-click="statusSelected = 'Status 3'" stopEvent><a role="menuitem">Status 3</a></li>
+                      <li role="presentation" ng-click="statusSelected = 'Status 4'" stopEvent><a role="menuitem">Status 4</a></li>
+                  </ul>
+              </div>
+              <div class="dropdown">
+                  <button class="group-dropdown btn btn-default dropdown-toggle other-input" ng-show="metaActive" style="float:left; border-radius:5px; width:140px; margin-top:20px; margin-bottom:20px;" type="button" data-toggle="dropdown" id="group_dropdown" aria-expanded="true">
+                      {{ metaSelected }}
+                      <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="group_dropdown" style="margin-top:60px;">
+                      <li role="presentation" ng-click="metaSelected = 'Meta 1'" stopEvent><a role="menuitem">Meta 1</a></li>
+                      <li role="presentation" ng-click="metaSelected = 'Meta 2'" stopEvent><a role="menuitem">Meta 2</a></li>
+                      <li role="presentation" ng-click="metaSelected = 'Meta 3'" stopEvent><a role="menuitem">Meta 3</a></li>
+                      <li role="presentation" ng-click="metaSelected = 'Meta 4'" stopEvent><a role="menuitem">Meta 4</a></li>
+                  </ul>
+              </div>
+              <input name="otherInput" id="meta_input" ng-enter="addTermToSearch('must')" ng-model="metaInput" class="other-input" ng-show="metaActive" style="margin-top:20px; margin-bottom:20px; border-radius:5px; padding:5px; width:280px" placeholder="Input Metadata">
+              <div style="text-align:center;">
+                  <button ng-show="!groupsActive" class="btn btn-default btn-success long-round-button" ng-click="addTermToSearch('must')" style="margin-right:5px; font-size: 12px;">Must</button>
+                  <button ng-show="!groupsActive" class="btn btn-default btn-primary long-round-button" ng-click="addTermToSearch('should')" style="margin-right:5px; font-size: 12px;">Should</button>
+                  <button ng-show="!groupsActive" class="btn btn-default btn-danger long-round-button" ng-click="addTermToSearch('mustnot')" style="font-size:12px;">Must Not</button>
+                  <button ng-show="groupsActive" class="btn btn-default btn-success long-round-button" ng-click="addProjectsToSearch('must')" style="margin-right:5px; font-size: 12px;"><b>IN</b> Groups</button>
+                  <button ng-show="groupsActive" class="btn btn-default btn-danger long-round-button" ng-click="addProjectsToSearch('mustnot')" style="font-size: 12px;"><b>NOT IN</b> Groups</button>
+              </div>
+              <div class="advanced-search-button" style="float:right; margin-top:40px; margin-right:-10px;">
+                  <button class="btn btn-default btn-success search-button"><small>Search</small></button><button class="btn btn-default btn-success" style="margin-left:-10px;"><span class="glyphicon glyphicon-floppy-disk"></span></button>
+              </div>
+          </div>
+          <!--Advanced Finish-->
+         <!--Summary Start-->
+          <div class="summary" ng-show="advancedOn && projects.length > 0 || titles.length > 0 || codes.length > 0 || disciplines.length > 0 || statuses.length > 0 || metadata.length > 0" style="margin-top:20px;">
+              <p style="color:red;">Search Summary: </p>
+              <div class="groups-summary" ng-show="advancedOn && projects.length > 0" style="float:left; margin-right:20px;">
+                  Groups:
+                  <ul class="tags-container">
+                      <li ng-repeat="tag in projects" style="margin-top: 10px;"><span style="font-size:13px;"  ng-class="{'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default label-success">{{ tag.value }}<a href="#" ng-click="deleteProjectFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="titles-summary" ng-show="advancedOn && titles.length > 0" style="float:left; margin-right:20px;">
+                  Titles:
+                  <ul class="tags-container">
+                      <li ng-repeat="tag in titles" style="margin-top: 10px;"><span style="font-size:13px;" ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteTitleFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="codes-summary" ng-show="advancedOn && codes.length > 0" style="float:left; margin-right:20px;">
+                  Codes:
+                  <ul class="tags-container">
+                      <li ng-repeat="tag in codes" style="margin-top: 10px;"><span style="font-size:13px;"  ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteCodeFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="disciplines-summary" ng-show="advancedOn && disciplines.length > 0" style="float:left; margin-right:20px;">
+                  Disciplines:
+                  <ul class="tags-container">
+                      <li ng-repeat="tag in disciplines" style="margin-top: 10px;"><span style="font-size:13px;"  ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteDisciplineFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="statuses-summary" ng-show="advancedOn && statuses.length > 0" style="float:left; margin-right:20px;">
+                  Statuses:
+                  <ul class="tags-container">
+                      <li ng-repeat="tag in statuses" style="margin-top: 10px;"><span style="font-size:13px;"  ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteStatusFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="metadata-summary" ng-show="advancedOn && metadata.length > 0" style="float:left; margin-right:20px;">
+                  Metadata:
+                  <ul class="tags-container">
+                      <li ng-repeat="tag in metadata" style="margin-top: 10px;"><span style="font-size:13px;"  ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteMetaFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+          </div>
+          <div class="summary-small" ng-show="advancedOn && projects.length > 0 || titles.length > 0 || codes.length > 0 || disciplines.length > 0 || statuses.length > 0 || metadata.length > 0" style="margin-top:20px;">
+              <p style="color:red;">Search Summary: </p>
+              <div class="groups-summary" ng-show="projects.length > 0">
+                  <small style="float:left; width: 50px;">Groups: </small>
+                  <ul class="tags-container" style="text-align: left; float:left; margin-left:5px;">
+                      <li style="float:left; margin-left:5px;" ng-repeat="tag in projects"><span style="font-size:13px;"   ng-class="{'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default label-success">{{ tag.value }}<a href="#" ng-click="deleteProjectFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; margin:0px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="titles-summary" ng-show="titles.length > 0">
+                  <small style="float:left; clear:left; width: 50px;">Titles: </small>
+                  <ul class="tags-container" style="text-align: left; float:left; margin-left:5px;">
+                      <li style="float:left; margin-left:5px;" ng-repeat="tag in titles"><span style="font-size:13px;"   ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteTitleFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="code-summary" ng-show="codes.length > 0">
+                  <small style="float:left; clear:left; width: 50px;">Codes: </small>
+                  <ul class="tags-container" style="text-align: left; float:left; margin-left:5px;">
+                      <li style="float:left; margin-left:5px;" ng-repeat="tag in codes"><span style="font-size:13px;"   ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteCodeFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="discipline-summary" ng-show="disciplines.length > 0">
+                  <small style="float:left; clear:left; width: 50px;">Titles: </small>
+                  <ul class="tags-container" style="text-align: left; float:left; margin-left:5px;">
+                      <li style="float:left; margin-left:5px;" ng-repeat="tag in disciplines"><span style="font-size:13px;"   ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteDisciplineFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="statuses-summary" ng-show="statuses.length > 0">
+                  <small style="float:left; clear:left; width: 50px;">Statuses: </small>
+                  <ul class="tags-container" style="text-align: left; float:left; margin-left:5px;">
+                      <li style="float:left; margin-left:5px;" ng-repeat="tag in statuses"><span style="font-size:13px;"   ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteStatusFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+              <div class="meta-summary" ng-show="metadata.length > 0">
+                  <small style="float:left; clear:left; width: 50px;">Metadata: </small>
+                  <ul class="tags-container" style="text-align: left; float:left; margin-left:5px;">
+                      <li style="float:left; margin-left:5px;" ng-repeat="tag in metadata"><span style="font-size:13px;"   ng-class="{'label-primary': tag.prefix == 'should', 'label-danger': tag.prefix == 'mustnot', 'label-success': tag.prefix == 'must'}" class="label label-default">{{ tag.value }} | <a href="#" ng-click="deleteMetaFromSearch(tag)"> <i class="glyphicon glyphicon-remove" style="padding:0 5px; color:white;"></i></a></span></li>
+                  </ul>
+              </div>
+          </div>
+            <!--Summary Finish-->
+    </div>
+
+</body>
+</html>
